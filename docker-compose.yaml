@@ -1,0 +1,63 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ccs_rabbitmq
+    ports:
+      - '5672:5672' # AMQP protocol
+      - '15672:15672' # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ccs_user
+      RABBITMQ_DEFAULT_PASS: ccs_pass
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ccs_network
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: ccs_redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - ccs_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ccs_postgres
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: ccs_user
+      POSTGRES_PASSWORD: ccs_password
+      POSTGRES_DB: ccs_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ccs_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ccs_user -d ccs_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  postgres_data:
+
+networks:
+  ccs_network:
+    driver: bridge
