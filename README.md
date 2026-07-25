@@ -124,7 +124,7 @@ Las señales de pánico son el caso de uso más crítico (latencia < 2s). En lug
 
 ### 5. Denormalización de Acciones en Rule
 
-En el modelo, las acciones asociadas a una regla se almacenan como un array JSON dentro de `Rule.actions`. Esto evita un JOIN con una tabla `Action` en cada evaluación. La tabla `ActionLog` mantiene la trazabilidad completa de cada acción ejecutada.
+En el modelo, las acciones asociadas a una regla se almacenan como un array dentro de `Rule.actions`. Esto evita un JOIN con una tabla `Action` en cada evaluación. La tabla `ActionLog` mantiene la trazabilidad completa de cada acción ejecutada.
 
 ---
 
@@ -307,9 +307,9 @@ erDiagram
     Rule {
         int id PK
         int vehicleId FK
-        string type "SPEED|LOCATION|SCHEDULE|PANIC"
+        string type "SPEED|LOCATION|SCHEDULE"
         json conditions "e.g. {max: 80}"
-        json actions "e.g. [NOTIFY_OWNER]"
+        list actions "e.g. [NOTIFY_OWNER]"
         boolean isActive
         timestamp createdAt
     }
@@ -338,10 +338,10 @@ erDiagram
 
 ### Justificación del Modelo de Datos
 
-1. **User:** Información estática del usuario. Rol para distinguir OWNER/DRIVER.
-2. **VehicleUser:** Relación muchos a muchos entre usuarios y vehículos.
+1. **User:** Información estática del usuario.
+2. **VehicleUser:** Relación muchos a muchos entre usuarios y vehículos. Rol para distinguir OWNER/DRIVER.
 3. **Vehicle:** Información estática del vehículo. Esta tabla es fuente de verdad para consultas históricas.
-4. **Rule:** Configuración de reglas por vehículo. El campo `actions` es un JSON con el array de acciones a ejecutar cuando se infringe la regla (denormalización deliberada para evitar JOINs en tiempo real). Las reglas se cargan en Redis al inicio y se invalidan al actualizarse.
+4. **Rule:** Configuración de reglas por vehículo. El campo `actions` es un array de acciones a ejecutar cuando se infringe la regla (denormalización deliberada para evitar JOINs en tiempo real). Las reglas se cargan en Redis al inicio y se invalidan al actualizarse.
 5. **Signal:** Tabla de alto crecimiento (500 inserciones/seg en pico). Clave primaria BigInt para soportar volúmenes masivos. Índice compuesto en `(vehicleId, receivedAt)` para consultas por vehículo en rangos de tiempo. Se recomienda particionamiento por tiempo (Time-Series) o migración a almacenamiento en frío.
 6. **ActionLog:** Trazabilidad completa de cada acción ejecutada. Registra qué notificación se disparó, por qué regla, y cuándo.
 
@@ -427,7 +427,7 @@ npx prisma migrate dev
 #### 2.3 Ejecutar la semilla de datos iniciales:
 
 ```bash
-npx ts-node prisma/seed.ts
+npx prisma db seed
 ```
 
 ### 3. Ejecución de Microservicios
@@ -494,7 +494,7 @@ npx ts-node verify-latency.ts
 │   ├── schema.prisma       # Modelo de base de datos
 │   ├── seed.ts             # Datos iniciales
 │   └── migrations/         # Migraciones de Prisma
-├── docker-compose.yml      # Infraestructura (RabbitMQ, Redis, Postgres)
+├── docker-compose.yaml      # Infraestructura (RabbitMQ, Redis, Postgres)
 ├── Dockerfile              # Contenedor de las apps NestJS
 ├── load-test.yaml          # Configuración de Artillery
 ├── verify-latency.ts       # Script de verificación E2E
