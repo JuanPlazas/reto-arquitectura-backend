@@ -25,6 +25,13 @@ enum RuleType {
   SCHEDULE
 }
 
+enum SignalType {
+  SPEED
+  LOCATION
+  SCHEDULE
+  PANIC
+}
+
 enum ActionType {
   NOTIFY_OWNER
   NOTIFY_AUTHORITIES
@@ -82,15 +89,15 @@ model Rule {
 }
 
 model Signal {
-  id         BigInt   @id @default(autoincrement())
+  id         BigInt     @id @default(autoincrement())
   vehicleId  Int
   latitude   Float
   longitude  Float
   direction  Float
   speed      Float?
-  type       String
+  type       SignalType
   metadata   Json?
-  receivedAt DateTime @default(now())
+  receivedAt DateTime   @default(now())
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id])
 
