@@ -27,6 +27,7 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
+package-lock.json
 
 # IDE - VSCode
 .vscode/*
@@ -51,6 +52,9 @@ pids
 *.pid
 *.seed
 *.pid.lock
+
+# Prisma
+/prisma/migrations
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

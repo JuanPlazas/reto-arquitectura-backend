@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  OWNER
+  DRIVER
+}
+
+enum VehicleType {
+  TRUCK
+  CAR
+  MOTO
+  TAXI
+}
+
+enum RuleType {
+  SPEED
+  LOCATION
+  SCHEDULE
+}
+
+enum ActionType {
+  NOTIFY_OWNER
+  NOTIFY_AUTHORITIES
+  NOTIFY_DRIVER
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  name        String
+  lastname    String
+  email       String        @unique
+  phone       String?
+  createdAt   DateTime      @default(now())
+  vehicleUser VehicleUser[]
+
+  @@map("User")
+}
+
+model VehicleUser {
+  userId    Int
+  vehicleId Int
+  role      RoleType // OWNER DRIVER
+  user      User     @relation(fields: [userId], references: [id])
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@id([userId, vehicleId, role])
+  @@map("VehicleUser")
+}
+
+model Vehicle {
+  id           Int           @id @default(autoincrement())
+  plate        String        @unique
+  type         VehicleType // TRUCK CAR MOTO TAXI
+  createdAt    DateTime      @default(now())
+  rules        Rule[]
+  signals      Signal[]
+  vehicleUsers VehicleUser[]
+  actionLogs   ActionLog[]
+
+  @@map("Vehicle")
+}
+
+model Rule {
+  id         Int          @id @default(autoincrement())
+  vehicleId  Int
+  type       RuleType // SPEED, LOCATION, SCHEDULE
+  conditions Json // { "maxSpeed": 80 }
+  actions    ActionType[] // NOTIFY_OWNER NOTIFY_AUTHORITIES NOTIFY_DRIVER
+  isActive   Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id])
+  actionLogs ActionLog[]
+
+  @@map("Rule")
+}
+
+model Signal {
+  id         BigInt   @id @default(autoincrement())
+  vehicleId  Int
+  latitude   Float
+  longitude  Float
+  direction  Float
+  speed      Float?
+  type       String
+  metadata   Json?
+  receivedAt DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId, receivedAt])
+  @@map("Signal")
+}
+
+model ActionLog {
+  id         Int      @id @default(autoincrement())
+  vehicleId  Int
+  ruleId     Int
+  action     String
+  reason     String
+  executedAt DateTime @default(now())
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  rule       Rule     @relation(fields: [ruleId], references: [id])
+
+  @@map("ActionLog")
+}
