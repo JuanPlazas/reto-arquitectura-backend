@@ -16,9 +16,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       host: process.env.REDIS_HOST || '127.0.0.1',
       port: parseInt(process.env.REDIS_PORT) || 6379,
       maxRetriesPerRequest: 3,
+      lazyConnect: true,
       connectTimeout: 5000, // 5 seconds
       family: 4, // Force IPv4
-      enableReadyCheck: true,
     });
 
     this.client.on('connect', () => {
@@ -59,5 +59,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async exists(key: string): Promise<boolean> {
     return (await this.client.exists(key)) === 1;
+  }
+
+  async pipeline() {
+    return this.client.pipeline();
   }
 }

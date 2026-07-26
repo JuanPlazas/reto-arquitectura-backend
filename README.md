@@ -90,7 +90,7 @@ El sistema sigue un enfoque de **Monorepo** (Monolito Modular), contenerizado co
 #### 4. Estrategia de Almacenamiento
 
 - **Redis (Datos Calientes):**
-  - Almacena: `Vehicle:{id}:LastState`, `Vehicle:{id}:Rules`.
+  - Almacena: `Vehicle:{id}:last_state`, `vehicle:{id}:{ruleType}`.
   - Por qué: Leer reglas de Postgres 500 veces/seg es costoso. Redis responde en sub-milisegundo.
 - **Postgres + Prisma (Persistencia):**
   - Almacena: Usuarios, Vehículos, Reglas Configuradas, Señales Históricas, Logs de Acciones.
@@ -125,6 +125,18 @@ Las señales de pánico son el caso de uso más crítico (latencia < 2s). En lug
 ### 5. Denormalización de Acciones en Rule
 
 En el modelo, las acciones asociadas a una regla se almacenan como un array dentro de `Rule.actions`. Esto evita un JOIN con una tabla `Action` en cada evaluación. La tabla `ActionLog` mantiene la trazabilidad completa de cada acción ejecutada.
+
+### 6. Estructura de Condiciones (min/max) en Reglas
+
+Cada regla almacena sus condiciones en un campo JSON con una estructura uniforme de `{ "campo": { "min": valor, "max": valor } }`. El Worker itera sobre las entradas de `conditions` y compara cada campo contra el valor correspondiente de la señal:
+
+| RuleType   | Condiciones en JSON                                                                       | Valor de la señal comparado                 |
+| ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `SPEED`    | `{ "speed": { "min": 0, "max": 80 } }`                                                    | `signal.speed`                              |
+| `LOCATION` | `{ "latitude": { "min": 4.5, "max": 4.7 }, "longitude": { "min": -74.1, "max": -74.0 } }` | `signal.latitude`, `signal.longitude`       |
+| `SCHEDULE` | `{ "0": { "min": "08:00", "max": "18:00" }, "1": { "min": "08:00", "max": "18:00" } }`    | Hora actual extraída de `signal.receivedAt` |
+
+**Por qué min/max:** Esta estructura genérica permite que el Worker evalúe cualquier regla sin importar el tipo, usando un solo loop que itera sobre las condiciones. No hay switch-case por tipo de regla (excepto SCHEDULE que requiere parseo de hora), lo que simplifica el código y facilita agregar nuevos tipos de reglas en el futuro.
 
 ---
 
@@ -198,12 +210,12 @@ sequenceDiagram
     activate W
 
     %% 3. Obtención de Reglas (Cache-Aside)
-    W->>R: GET vehicle:{id}:rules
+    W->>R: GET vehicle:{id}:{ruleType}
     alt Cache Miss
         R-->>W: null
         W->>DB: SELECT * FROM Rule WHERE vehicleId={id}
         DB-->>W: Reglas (e.g. MaxSpeed=80)
-        W->>R: SET vehicle:{id}:rules
+        W->>R: SET vehicle:{id}:{ruleType}
     else Cache Hit
         R-->>W: Reglas JSON
     end
@@ -308,7 +320,7 @@ erDiagram
         int id PK
         int vehicleId FK
         string type "SPEED|LOCATION|SCHEDULE"
-        json conditions "e.g. {max: 80}"
+        json conditions "e.g. {speed: {min: 0, max: 80}}"
         list actions "e.g. [NOTIFY_OWNER]"
         boolean isActive
         timestamp createdAt
@@ -353,9 +365,19 @@ erDiagram
 
 Tanto el Worker como el Actions Service utilizan ACK manual. Si el procesamiento de un mensaje falla, se envía un `nack` con reencolamiento (`requeue: true`), permitiendo un reintento automático.
 
-### Dead-Letter Queue (Planificado)
+### Dead-Letter Queue (DLQ)
 
-En un entorno productivo, después de N reintentos fallidos, los mensajes se dirigirían a una Dead-Letter Queue (DLQ) para inspección manual. Esto evita loops infinitos de reintento que podrían bloquear la cola principal.
+Después de MAX_RETRIES_SIGNAL reintentos fallidos, el mensaje se envía a la cola `signal.dlq` para inspección manual. El Worker cuenta los reintentos mediante el header `x-death` que RabbitMQ agrega automáticamente al reencolar.
+
+```
+1er delivery → falla → nack(requeue=true) → RabbitMQ reencola
+2do delivery → falla → nack(requeue=true) → RabbitMQ reencola  (x-death.count=1)
+3er delivery → falla → nack(requeue=true) → RabbitMQ reencola  (x-death.count=2)
+4to delivery → falla → nack(requeue=false) → mensaje eliminado  (x-death.count=3)
+                        └─ publish a signal.dlq antes del nack
+```
+
+Esto evita loops infinitos que podrían bloquear la cola principal. Los mensajes en `signal.dlq` pueden ser reprocesados manualmente o por un futuro consumidor dedicado.
 
 ### Fallo de Redis
 
