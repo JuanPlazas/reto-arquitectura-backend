@@ -78,7 +78,7 @@ model Rule {
   id         Int          @id @default(autoincrement())
   vehicleId  Int
   type       RuleType // SPEED, LOCATION, SCHEDULE
-  conditions Json // { "maxSpeed": 80 }
+  conditions Json // { "speed": { "min": 0, "max": 80 } }
   actions    ActionType[] // NOTIFY_OWNER NOTIFY_AUTHORITIES NOTIFY_DRIVER
   isActive   Boolean      @default(true)
   createdAt  DateTime     @default(now())

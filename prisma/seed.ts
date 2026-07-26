@@ -85,7 +85,7 @@ const createRules = async (vehicles: Vehicle[]) => {
       id: 1,
       vehicleId: -1,
       type: RuleType.SPEED,
-      conditions: { max: 80 },
+      conditions: { speed: { min: 0, max: 80 } },
       actions: [ActionType.NOTIFY_OWNER, ActionType.NOTIFY_DRIVER],
       isActive: true,
       createdAt: new Date(),
@@ -95,15 +95,10 @@ const createRules = async (vehicles: Vehicle[]) => {
       vehicleId: -1,
       type: RuleType.LOCATION,
       conditions: {
-        latitude: 50.999,
-        longitude: -50.999,
-        radius: 100,
+        latitude: { min: -50.999, max: 150.999 },
+        longitude: { min: -150.999, max: 50.999 },
       },
-      actions: [
-        ActionType.NOTIFY_OWNER,
-        ActionType.NOTIFY_DRIVER,
-        ActionType.NOTIFY_AUTHORITIES,
-      ],
+      actions: [ActionType.NOTIFY_OWNER, ActionType.NOTIFY_DRIVER, ActionType.NOTIFY_AUTHORITIES],
       isActive: true,
       createdAt: new Date(),
     },
@@ -112,11 +107,12 @@ const createRules = async (vehicles: Vehicle[]) => {
       vehicleId: -1,
       type: RuleType.SCHEDULE,
       conditions: {
-        lunes: { day: 1, hourInit: '08:00', hourEnd: '18:00' },
-        martes: { day: 2, hourInit: '08:00', hourEnd: '18:00' },
-        miercoles: { day: 3, hourInit: '08:00', hourEnd: '18:00' },
-        jueves: { day: 4, hourInit: '08:00', hourEnd: '18:00' },
-        viernes: { day: 5, hourInit: '08:00', hourEnd: '12:00' },
+        // numbers day about Date js
+        1: { min: '08:00', max: '18:00' },
+        2: { min: '08:00', max: '18:00' },
+        3: { min: '08:00', max: '18:00' },
+        4: { min: '08:00', max: '18:00' },
+        5: { min: '08:00', max: '12:00' },
       },
       actions: [ActionType.NOTIFY_OWNER],
       isActive: true,
@@ -126,7 +122,7 @@ const createRules = async (vehicles: Vehicle[]) => {
 
   const dataWillSave: Rule[] = [];
   for (let i = 0; i < vehicles.length; i++) {
-    const qtyRules = Math.floor(Math.random() * 4);
+    const qtyRules = Math.floor(Math.random() * 3) + 1;
 
     for (let j = 0; j < qtyRules; j++) {
       const data = { ...rules[j] };
@@ -143,16 +139,16 @@ const createRules = async (vehicles: Vehicle[]) => {
 };
 
 async function main() {
-  // 1. Create Owners
+  // Create Owners
   const users: User[] = await createUsers();
 
-  // 2. Create Vehicles
+  // Create Vehicles
   const vehicles: Vehicle[] = await createVehicles();
 
-  // 3. Create relation between Users and Vehicles
+  // Create relation between Users and Vehicles
   await createVehicleUser(users, vehicles);
 
-  // 4. Create Rules
+  // Create Rules
   await createRules(vehicles);
 }
 
