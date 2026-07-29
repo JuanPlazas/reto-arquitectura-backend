@@ -9,18 +9,24 @@ export class ActionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async executeAction(data: Rule | SignalDto) {
-    // simulate delay or external API call (SMS/Email)
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const actions =
       data.type === SignalType.PANIC
         ? [ActionType.NOTIFY_AUTHORITIES, ActionType.NOTIFY_DRIVER, ActionType.NOTIFY_OWNER]
-        : 'actions' in data && data.actions;
+        : 'actions' in data && Array.isArray(data.actions)
+          ? data.actions
+          : null;
+
+    if (!actions) {
+      this.logger.warn(`No actions defined for vehicle ${data.vehicleId}`);
+      return;
+    }
+
     this.logger.log(`Executing action for vehicle ${data.vehicleId}: ${actions}`);
 
     for (const action of actions) {
       try {
-        /** integrate services to SMS-Email */
         switch (action) {
           case ActionType.NOTIFY_OWNER:
             this.logger.log(`Notifying owner for vehicle ${data.vehicleId}`);
@@ -38,7 +44,12 @@ export class ActionsService {
         await this.prisma.actionLog.create({
           data: {
             vehicleId: data.vehicleId,
-            ruleId: data.type === SignalType.PANIC ? null : 'id' in data && data.id,
+            ruleId:
+              data.type === SignalType.PANIC
+                ? null
+                : 'id' in data && typeof data.id === 'number'
+                  ? data.id
+                  : null,
             reason: data.type,
             action: action,
             executedAt: new Date(),

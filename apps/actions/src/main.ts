@@ -14,6 +14,7 @@ async function bootstrap() {
       },
     },
   });
+  app.enableShutdownHooks();
   await app.listen();
   console.log('Actions Service is listening');
 }

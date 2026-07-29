@@ -1,16 +1,22 @@
-import { Controller, Post, Body, Logger, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Logger, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { SignalDto } from '@app/shared';
 import { IngestionService } from './ingestion.service';
 
 @ApiTags('Signals')
-@Controller('signals')
+@Controller()
 export class IngestionController {
   private readonly logger = new Logger(IngestionController.name);
 
   constructor(private readonly ingestionService: IngestionService) {}
 
-  @Post()
+  @Get('health')
+  @ApiOperation({ summary: 'Health check' })
+  health() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+
+  @Post('signals')
   @ApiOperation({ summary: 'Receive vehicle signals' })
   @ApiResponse({ status: 202, description: 'Request accepted for processing' })
   @ApiResponse({ status: 400, description: 'Invalid data' })
