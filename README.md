@@ -487,7 +487,8 @@ npm run test
 Simular 500 peticiones/segundo:
 
 ```bash
-npm run artillery:load
+npm run artillery:load:report o ## crea reporte json
+npm run artillery:load # solo ejecuta las pruebas de estres
 ```
 
 #### Verificación de Latencia
@@ -518,7 +519,7 @@ npx ts-node verify-latency.ts
 │   └── migrations/         # Migraciones de Prisma
 ├── artillery/
 │   ├── artillery.yaml      # Configuración de Artillery
-│   └── process.js          # Configuración de Artillery
+│   └── processor.js          # Configuración de Artillery
 ├── docker-compose.yaml     # Infraestructura (RabbitMQ, Redis, Postgres)
 ├── Dockerfile              # Contenedor de las apps NestJS
 ├── verify-latency.ts       # Script de verificación E2E
