@@ -4,18 +4,18 @@ import { ActionsService } from './actions.service';
 
 @Controller()
 export class ActionsController {
-    constructor(private readonly actionsService: ActionsService) { }
+  constructor(private readonly actionsService: ActionsService) {}
 
-    @EventPattern('action.required')
-    async handleAction(@Payload() data: any, @Ctx() context: RmqContext) {
-        const channel = context.getChannelRef();
-        const originalMsg = context.getMessage();
+  @EventPattern('action.required')
+  async handleAction(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
 
-        try {
-            await this.actionsService.executeAction(data);
-            channel.ack(originalMsg);
-        } catch (error) {
-            channel.nack(originalMsg);
-        }
+    try {
+      await this.actionsService.executeAction(data);
+      channel.ack(originalMsg);
+    } catch {
+      channel.nack(originalMsg);
     }
+  }
 }

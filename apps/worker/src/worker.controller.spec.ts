@@ -73,10 +73,7 @@ describe('WorkerController', () => {
 
       await controller.handleSignal(mockSignal, createMockContext(3));
 
-      expect(mockWorkerService.sendToDLQ).toHaveBeenCalledWith(
-        mockSignal,
-        'evaluation failed',
-      );
+      expect(mockWorkerService.sendToDLQ).toHaveBeenCalledWith(mockSignal, 'evaluation failed');
       expect(mockChannel.nack).toHaveBeenCalledWith(expect.anything(), false, false);
       expect(mockChannel.ack).not.toHaveBeenCalled();
     });
