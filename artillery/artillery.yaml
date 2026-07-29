@@ -1,0 +1,18 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 100
+      rampTo: 500
+      name: 'Ramp up to 500 req/s'
+    - duration: 120
+      arrivalRate: 500
+      name: 'Sustain 500 req/s'
+  processor: './processor.js'
+
+scenarios:
+  - flow:
+      - function: generatePayload
+      - post:
+          url: '/signals'
+          json: '{{ payload }}'

@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "artillery:load": "artillery run artillery/artillery.yaml",
+    "artillery:load:report": "artillery run --output artillery/report.json artillery/artillery.yaml && artillery report artillery/report.json -o artillery/report.html"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -44,6 +46,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.0.0",
+    "artillery": "^2.0.33",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
