@@ -487,7 +487,7 @@ npm run test
 Simular 500 peticiones/segundo:
 
 ```bash
-npx artillery run load-test.yaml
+npm run artillery:load
 ```
 
 #### Verificación de Latencia
@@ -516,9 +516,11 @@ npx ts-node verify-latency.ts
 │   ├── schema.prisma       # Modelo de base de datos
 │   ├── seed.ts             # Datos iniciales
 │   └── migrations/         # Migraciones de Prisma
-├── docker-compose.yaml      # Infraestructura (RabbitMQ, Redis, Postgres)
+├── artillery/
+│   ├── artillery.yaml      # Configuración de Artillery
+│   └── process.js          # Configuración de Artillery
+├── docker-compose.yaml     # Infraestructura (RabbitMQ, Redis, Postgres)
 ├── Dockerfile              # Contenedor de las apps NestJS
-├── load-test.yaml          # Configuración de Artillery
 ├── verify-latency.ts       # Script de verificación E2E
 └── package.json
 ```
