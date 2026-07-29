@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Logger,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Body, Logger, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { SignalDto } from '@app/shared';
 import { IngestionService } from './ingestion.service';
@@ -25,9 +18,7 @@ export class IngestionController {
   @ApiBody({ type: SignalDto })
   @HttpCode(HttpStatus.ACCEPTED)
   async ingestSignal(@Body() signalDto: SignalDto) {
-    this.logger.log(
-      `Received signal from vehicle ${signalDto.vehicleId} type ${signalDto.type}`,
-    );
+    this.logger.log(`Received signal from vehicle ${signalDto.vehicleId} type ${signalDto.type}`);
 
     await this.ingestionService.publishSignal(signalDto);
 

@@ -49,7 +49,10 @@ describe('IngestionController', () => {
   });
 
   it('should have HttpCode ACCEPTED (202) on ingestSignal', () => {
-    const metadata = Reflect.getMetadata('__httpCode__', IngestionController.prototype.ingestSignal);
+    const metadata = Reflect.getMetadata(
+      '__httpCode__',
+      IngestionController.prototype.ingestSignal,
+    );
     expect(metadata).toBe(HttpStatus.ACCEPTED);
   });
 });

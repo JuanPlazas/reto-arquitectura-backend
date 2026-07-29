@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServiceUnavailableException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { of, throwError, Subject } from 'rxjs';
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { IngestionService } from './ingestion.service';
@@ -26,10 +25,7 @@ describe('IngestionService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        IngestionService,
-        { provide: 'SIGNAL_SERVICE', useValue: mockClient },
-      ],
+      providers: [IngestionService, { provide: 'SIGNAL_SERVICE', useValue: mockClient }],
     }).compile();
 
     service = module.get<IngestionService>(IngestionService);

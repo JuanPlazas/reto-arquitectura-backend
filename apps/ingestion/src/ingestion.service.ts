@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom, catchError, throwError, timeout } from 'rxjs';
 import { SignalDto } from '@app/shared';
@@ -26,22 +21,15 @@ export class IngestionService {
           catchError((error) => {
             this.logger.error(`RabbitMQ publish failed: ${error.message}`);
             return throwError(
-              () =>
-                new ServiceUnavailableException(
-                  'RabbitMQ is unavailable, please try later.',
-                ),
+              () => new ServiceUnavailableException('RabbitMQ is unavailable, please try later.'),
             );
           }),
         ),
       );
     } catch (error) {
       if (error instanceof ServiceUnavailableException) throw error;
-      this.logger.error(
-        `Unexpected error publishing signal: ${(error as Error).message}`,
-      );
-      throw new ServiceUnavailableException(
-        'RabbitMQ is unavailable, please try later.',
-      );
+      this.logger.error(`Unexpected error publishing signal: ${(error as Error).message}`);
+      throw new ServiceUnavailableException('RabbitMQ is unavailable, please try later.');
     }
   }
 }

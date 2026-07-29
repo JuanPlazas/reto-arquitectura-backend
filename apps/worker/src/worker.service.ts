@@ -68,7 +68,7 @@ export class WorkerService implements OnApplicationBootstrap {
         reason,
       });
       this.logger.warn(`Signal routed to DLQ: vehicle ${signal.vehicleId} — ${reason}`);
-    } catch (error) {
+    } catch {
       this.logger.error(`Failed Signal routed to DLQ`);
     }
   }

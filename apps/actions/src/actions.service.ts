@@ -18,7 +18,7 @@ export class ActionsService {
         : 'actions' in data && data.actions;
     this.logger.log(`Executing action for vehicle ${data.vehicleId}: ${actions}`);
 
-    for (let action of actions) {
+    for (const action of actions) {
       try {
         /** integrate services to SMS-Email */
         switch (action) {

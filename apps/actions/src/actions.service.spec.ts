@@ -34,10 +34,7 @@ describe('ActionsService', () => {
     mockPrisma = { actionLog: { create: fn() } };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ActionsService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [ActionsService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<ActionsService>(ActionsService);
