@@ -108,12 +108,12 @@ model Signal {
 model ActionLog {
   id         Int      @id @default(autoincrement())
   vehicleId  Int
-  ruleId     Int
+  ruleId     Int?
   action     String
   reason     String
   executedAt DateTime @default(now())
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
-  rule       Rule     @relation(fields: [ruleId], references: [id])
+  rule       Rule?    @relation(fields: [ruleId], references: [id])
 
   @@map("ActionLog")
 }

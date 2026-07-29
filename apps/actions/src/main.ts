@@ -7,17 +7,14 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-      queue: 'signals_queue',
+      queue: 'actions_queue',
       noAck: false,
       queueOptions: {
         durable: true,
       },
     },
   });
-  // shutdown: NestJS will call onModuleDestroy() on all modules
-  // (Prisma, Redis, RMQ client) before the process exits.
-  app.enableShutdownHooks();
   await app.listen();
-  console.log('Worker Service is listening');
+  console.log('Actions Service is listening');
 }
 bootstrap();
