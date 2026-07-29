@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { WorkerController } from './worker.controller';
 import { WorkerService } from './worker.service';
-import { PrismaService, RedisService, SharedModule } from '@app/shared';
+import { SharedModule } from '@app/shared';
 
 @Module({
   imports: [

@@ -27,6 +27,15 @@
         "tsConfigPath": "apps/worker/tsconfig.app.json"
       }
     },
+    "actions": {
+      "type": "application",
+      "root": "apps/actions",
+      "entryFile": "main",
+      "sourceRoot": "apps/actions/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/actions/tsconfig.app.json"
+      }
+    },
     "shared": {
       "type": "library",
       "root": "libs/shared",
