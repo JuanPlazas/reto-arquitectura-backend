@@ -49,12 +49,12 @@ describe('ActionsController', () => {
       expect(mockChannel.nack).not.toHaveBeenCalled();
     });
 
-    it('should nack the message on error', async () => {
+    it('should nack with requeue on error', async () => {
       mockActionsService.executeAction.mockRejectedValue(new Error('execution failed'));
 
       await controller.handleAction(mockData, createMockContext());
 
-      expect(mockChannel.nack).toHaveBeenCalledTimes(1);
+      expect(mockChannel.nack).toHaveBeenCalledWith(expect.anything(), false, true);
       expect(mockChannel.ack).not.toHaveBeenCalled();
     });
   });

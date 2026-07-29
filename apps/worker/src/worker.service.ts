@@ -110,8 +110,9 @@ export class WorkerService implements OnApplicationBootstrap {
           const currentDate = new Date(signal.receivedAt);
           const conditions = parsedRule.conditions;
           const { min, max } = conditions[currentDate.getDay()];
-          const minDate = new Date(`${currentDate.toLocaleDateString()} ${min}`);
-          const maxDate = new Date(`${currentDate.toLocaleDateString()} ${max}`);
+          const dateStr = currentDate.toLocaleDateString('es-CO');
+          const minDate = new Date(`${dateStr} ${min}`);
+          const maxDate = new Date(`${dateStr} ${max}`);
           if (currentDate < minDate || currentDate > maxDate) {
             this.actionClient.emit('action.required', parsedRule);
           }

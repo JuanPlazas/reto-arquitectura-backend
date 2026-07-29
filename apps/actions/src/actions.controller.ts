@@ -15,7 +15,7 @@ export class ActionsController {
       await this.actionsService.executeAction(data);
       channel.ack(originalMsg);
     } catch {
-      channel.nack(originalMsg);
+      channel.nack(originalMsg, false, true);
     }
   }
 }

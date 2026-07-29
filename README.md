@@ -521,7 +521,6 @@ npx ts-node verify-latency.ts
 │   ├── artillery.yaml      # Configuración de Artillery
 │   └── processor.js          # Configuración de Artillery
 ├── docker-compose.yaml     # Infraestructura (RabbitMQ, Redis, Postgres)
-├── Dockerfile              # Contenedor de las apps NestJS
 ├── verify-latency.ts       # Script de verificación E2E
 └── package.json
 ```
